@@ -8,3 +8,5 @@ My suggested backend - Render + Mongodb/Mongoose (Free to some extent and low co
 Tutorial youtube - https://www.youtube.com/watch?v=MLcVNC9yzLY&t=19s
 
 For inquiries, please email: travelmilesmine@gmail.com
+
+Telegram Tap Game Mini App examples are hamster kombat tap game, notcoin tap game, tapswap, star network, yescoin
