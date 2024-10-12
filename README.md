@@ -1,4 +1,4 @@
-This is the template for the Telegram mini app.
+This is the template for the Telegram mini app or specifically Telegram Tap Game Mini App.
 For inquiries, please email: travelmilesmine@gmail.com
 Try out the game at this Telegram channel: https://t.me/travelmilesmine
 
