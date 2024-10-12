@@ -1,0 +1,131 @@
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+
+
+// This is your Render Server Url
+const API_URL = 'https://sample.onrender.com';
+
+// Set Your constants
+function App() {
+    const [score, setScore] = useState(0);
+    const [gameActive, setGameActive] = useState(false);
+    const [userId, setUserId] = useState(null);
+    const location = useLocation();
+
+// Fetching Score Of Users
+    const retrievescore = async (currentUserId = '12345678') => {
+        console.log('Fetching Score for user:', currentUserId);
+        try {
+            const response = await fetch(`${API_URL}/retrievescore?userId=${currentUserId}`, {
+                method: 'GET',
+            });
+    
+            const data = await response.json();
+            if (response.ok) {
+                console.log('Fetched miles:', data.miles);
+                setScore(prevScore => Math.max(prevScore, data.miles)); 
+            } else {
+                console.error('Error fetching miles:', data.error);
+            }
+        } catch (error) {
+            console.error('Error fetching miles:', error);
+        }
+    };    
+
+    const startGame = async () => {
+        console.log('Game started'); 
+        setGameActive(true);
+        const currentUserId = userId || '12345678'; 
+        await retrievescore(currentUserId); // Fetch and set miles when the game starts
+    };
+    
+
+    const handleTap = async () => {
+        const currentUserId = userId || '12345678'; 
+        console.log('Current User ID:', currentUserId);
+        setScore(prevScore => prevScore + 1); 
+        await earnMiles(currentUserId);
+    };
+
+//Reward Score
+    const rewardScore = async (currentUserId) => {
+        const payload = { userId: currentUserId };
+        console.log('Request body for rewardScore:', JSON.stringify(payload));
+        try {
+            const response = await fetch(`${API_URL}/reward`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                console.log('Reward Score:', data.message); 
+            } else {
+                console.error('Error earning score:', data.errors || 'No error message returned');
+            }
+        } catch (error) {
+            console.error('Error earning score:', error);
+        }
+    };
+
+  //Get USERID
+
+    const fetchUserId = async (retries = 3) => {
+        if (window.Telegram && window.Telegram.WebApp) {
+            window.Telegram.WebApp.ready();
+            console.log('Telegram Web App is available');
+    
+            const userInfo = window.Telegram.WebApp.initDataUnsafe;
+            console.log('User Info:', userInfo);
+    
+            const startParam = userInfo?.start_param || null; // Access the referral code
+            console.log('Start parameter (referred by):', startParam);
+    
+            if (userInfo && userInfo.user && userInfo.user.id) {
+                const fetchedUserId = userInfo.user.id;
+                console.log('User ID fetched:', fetchedUserId);
+                setUserId(fetchedUserId);
+    
+                // Register the user with their user ID
+                await registerUser(fetchedUserId, startParam); 
+    
+                // After registration, call /refer if there is a start parameter
+                if (startParam) {
+                    console.log('Referred by detected, sending to /refer:', startParam);
+                    await referUser(fetchedUserId, startParam);
+                }
+    
+                await fetchMiles(fetchedUserId); // Fetch miles immediately after user ID is set
+            } else {
+                console.error('User information is incomplete or unavailable', userInfo);
+                if (retries > 0) {
+                    console.log('Retrying to fetch user ID...');
+                    setTimeout(() => fetchUserId(retries - 1), 1000);
+                }
+            }
+        } else {
+            console.warn('Telegram Web App not available, using mock user ID');
+            const mockUserId = '12345678'; // Your mock user ID
+            setUserId(mockUserId);
+            await fetchMiles(mockUserId); // Fetch miles immediately with the mock user ID
+        }
+    };
+    
+    // Routes
+            
+            <Routes>
+                <Route path="/"  />} />
+                <Route path="/tasks" element={<Tasks userId={userId} setScore={setScore} />} />
+            </Routes>
+        </div>
+    );    
+}    
+
+export default () => (
+    <Router>
+        <App />
+    </Router>
+);
